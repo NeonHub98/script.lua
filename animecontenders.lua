@@ -48,9 +48,9 @@ TeleporteLoop:OnChanged(function()
         local hrp = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
             hrp.CFrame = CFrame.new(-2299.96045, -286.939514, 215.030273)
-            task.wait(0.25)
+            task.wait(1)
             hrp.CFrame = CFrame.new(-2325.96045, -286.939514, 319.030273)
-            task.wait(0.50)
+            task.wait(1)
             hrp.CFrame = CFrame.new(-2312.94971, -274.00415, 288.087891)
             task.wait(1)
         else
