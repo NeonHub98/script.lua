@@ -35,7 +35,7 @@ Window:SelectTab(1)
 
 Tabs.Main:AddParagraph({
     Title = "🧪 Farm de Trial",
-    Content = "Este sistema de Auto Farm com loop de teleporte alterna entre duas posições estratégicas com intervalo de 1 segundo."
+    Content = "Loop de teleporte entre duas posições com intervalo de 1 segundo."
 })
 
 local TeleporteLoop = Tabs.Main:AddToggle("TeleporteLoop", {
@@ -55,6 +55,49 @@ TeleporteLoop:OnChanged(function()
             task.wait(1)
         end
     end
+end)
+
+--------------------------------------------------
+-- ⚙️ AUTO STATUS: Dropdown + toggle
+--------------------------------------------------
+
+Tabs.Main:AddParagraph({
+    Title = "⚙️ Auto Status",
+    Content = "Selecione um atributo e ative o loop para aplicar upgrades automáticos."
+})
+
+local statusDropdown = Tabs.Main:AddDropdown("StatusSelector", {
+    Title = "Selecionar Atributo",
+    Values = {
+        "Power",
+        "Stars",
+        "Damage",
+        "Luck",
+        "Exp",
+        "Drops"
+    },
+    Multi = false,
+    Default = "Power"
+})
+
+local statusLoopToggle = Tabs.Main:AddToggle("StatusLoopToggle", {
+    Title = "Aplicar Upgrade em Loop",
+    Default = false
+})
+
+statusLoopToggle:OnChanged(function()
+    coroutine.wrap(function()
+        while statusLoopToggle.Value do
+            local selected = statusDropdown.Value
+            if selected then
+                Main:FireServer("agjajb", {
+                    Stat = selected,
+                    Cantity = 3
+                })
+            end
+            task.wait(0.1)
+        end
+    end)()
 end)
 
 --------------------------------------------------
