@@ -61,7 +61,6 @@ end)
 -- 🎰 GACHA: Organizado por sistemas com tempo 0.1s
 --------------------------------------------------
 
--- 🧙‍♂️ AVATAR SYSTEM
 Tabs.Gacha:AddParagraph({
     Title = "🧙‍♂️ Avatar System",
     Content = "Ative repetidamente o Avatar JJK"
@@ -79,137 +78,77 @@ AvatarToggle:OnChanged(function()
     end
 end)
 
--- 🗡️ ISLAND OF ASSASSINS
-Tabs.Gacha:AddParagraph({
-    Title = "🗡️ Island of Assassins",
-    Content = "Tokens relacionados à ilha dos assassinos"
-})
+local function createTokenToggles(tab, title, tokens)
+    tab:AddParagraph({ Title = title, Content = "Tokens disponíveis para este sistema" })
+    for _, token in ipairs(tokens) do
+        local toggle = tab:AddToggle(title .. "_" .. token.id, {
+            Title = token.label,
+            Default = false
+        })
+        toggle:OnChanged(function()
+            coroutine.wrap(function()
+                while toggle.Value do
+                    Main:FireServer("usvp", { Type = token.id })
+                    task.wait(0.1)
+                end
+            end)()
+        end)
+    end
+end
 
-local assassinTokens = {
+createTokenToggles(Tabs.Gacha, "🗡️ Island of Assassins", {
     { id = "Wings", label = "Consumir Wings" },
     { id = "SwordToken", label = "Consumir SwordToken" }
-}
-
-for _, token in ipairs(assassinTokens) do
-    local toggle = Tabs.Gacha:AddToggle("Assassin_" .. token.id, {
-        Title = token.label,
-        Default = false
-    })
-
-    toggle:OnChanged(function()
-        coroutine.wrap(function()
-            while toggle.Value do
-                Main:FireServer("usvp", { Type = token.id })
-                task.wait(0.1)
-            end
-        end)()
-    end)
-end
-
--- 🐉 DRAGON SYSTEMS
-Tabs.Gacha:AddParagraph({
-    Title = "🐉 Dragon Systems",
-    Content = "Tokens relacionados ao universo Dragon Ball"
 })
 
-local dragonTokens = {
+createTokenToggles(Tabs.Gacha, "🐉 Dragon Systems", {
     { id = "SaiyanToken", label = "Consumir SaiyanToken" },
     { id = "Capsule", label = "Consumir Capsule" }
-}
-
-for _, token in ipairs(dragonTokens) do
-    local toggle = Tabs.Gacha:AddToggle("Dragon_" .. token.id, {
-        Title = token.label,
-        Default = false
-    })
-
-    toggle:OnChanged(function()
-        coroutine.wrap(function()
-            while toggle.Value do
-                Main:FireServer("usvp", { Type = token.id })
-                task.wait(0.1)
-            end
-        end)()
-    end)
-end
-
--- 🌑 SLAYER SYSTEMS
-Tabs.Gacha:AddParagraph({
-    Title = "🌑 Slayer Systems",
-    Content = "Tokens relacionados ao universo Demon Slayer"
 })
 
-local slayerTokens = {
+createTokenToggles(Tabs.Gacha, "🌑 Slayer Systems", {
     { id = "DemonToken", label = "Consumir DemonToken" },
     { id = "BreathingToken", label = "Consumir BreathingToken" }
-}
-
-for _, token in ipairs(slayerTokens) do
-    local toggle = Tabs.Gacha:AddToggle("Slayer_" .. token.id, {
-        Title = token.label,
-        Default = false
-    })
-
-    toggle:OnChanged(function()
-        coroutine.wrap(function()
-            while toggle.Value do
-                Main:FireServer("usvp", { Type = token.id })
-                task.wait(0.1)
-            end
-        end)()
-    end)
-end
-
--- 🌀 JUJUTSU SYSTEMS
-Tabs.Gacha:AddParagraph({
-    Title = "🌀 Jujutsu Systems",
-    Content = "Tokens relacionados ao universo Jujutsu Kaisen"
 })
 
-local jujutsuTokens = {
+createTokenToggles(Tabs.Gacha, "🌀 Jujutsu Systems", {
     { id = "SukunaToken", label = "Consumir SukunaToken" },
     { id = "LineageToken", label = "Consumir LineageToken" }
-}
-
-for _, token in ipairs(jujutsuTokens) do
-    local toggle = Tabs.Gacha:AddToggle("Jujutsu_" .. token.id, {
-        Title = token.label,
-        Default = false
-    })
-
-    toggle:OnChanged(function()
-        coroutine.wrap(function()
-            while toggle.Value do
-                Main:FireServer("usvp", { Type = token.id })
-                task.wait(0.1)
-            end
-        end)()
-    end)
-end
+})
 
 --------------------------------------------------
 -- 🛍️ TRIAL SHOP: Dropdown + compra em loop
 --------------------------------------------------
 
 Tabs.TrialShop:AddParagraph({
-    Title = "🛍️ Comprar Item",
-    Content = "Escolha um item e ative o loop para comprar continuamente"
+    Title = "🛍️ Trial Shop",
+    Content = "Escolha um item da loja e ative o loop para comprá-lo continuamente."
 })
 
 local itemDropdown = Tabs.TrialShop:AddDropdown("ItemSelector", {
     Title = "Selecionar Item",
     Values = {
-        "StarPotion",
-        "DropsPotion",
-        "LuckPotion",
-        "ExpPotion",
-        "DamagePotion",
-        "StatReset",
-        "ChronoTicket"
+        "ChronoTicket",  -- 1
+        "StatReset",     -- 8
+        "DamagePotion",  -- 2
+        "ExpPotion",     -- 3
+        "LuckPotion",    -- 4
+        "DropPotion",    -- 5
+        "StarPotion"     -- 6
     },
     Multi = false,
-    Default = "StarPotion"
+    Default = "ChronoTicket"
 })
+
+local itemNumbers = {
+    ChronoTicket = 1,
+    DamagePotion = 2,
+    ExpPotion = 3,
+    LuckPotion = 4,
+    DropPotion = 5,
+    StarPotion = 6,
+    StatReset = 8
+}
 
 local buyLoopToggle = Tabs.TrialShop:AddToggle("BuyLoopToggle", {
     Title = "Comprar em Loop",
@@ -220,12 +159,9 @@ buyLoopToggle:OnChanged(function()
     coroutine.wrap(function()
         while buyLoopToggle.Value do
             local selected = itemDropdown.Value
-            if selected then
-                firesignal(Main.OnClientEvent, "AddingItem", {
-                    Type = "Plus",
-                    Item = selected,
-                    Cantity = 1
-                })
+            local itemNumber = itemNumbers[selected]
+            if itemNumber then
+                Main:FireServer("akvaksvax", { Number = itemNumber })
             end
             task.wait(0.1)
         end
