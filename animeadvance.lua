@@ -1,5 +1,6 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
 local MarketplaceService = game:GetService("MarketplaceService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -15,7 +16,7 @@ local Window = Fluent:CreateWindow({
     Title = "NetoX Hub",
     SubTitle = "-- " .. gameName,
     TabWidth = 110,
-    Size = UDim2.fromOffset(400, 220),
+    Size = UDim2.fromOffset(400, 200),
     Acrylic = false,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -26,13 +27,7 @@ Window:SelectTab(1)
 
 Tab:AddParagraph({
     Title = "👹 Auto Boss",
-    Content = "A cada 10 minutos, teleporta para os 7 CFrames por 3s cada"
-})
-
--- Label do contador
-local countdownLabel = Tab:AddParagraph({
-    Title = "⏳ Tempo até próxima varredura:",
-    Content = "Aguardando ativação..."
+    Content = "Varredura a cada 10 minutos + detecção de boss global"
 })
 
 -- Lista de CFrames dos bosses
@@ -52,35 +47,48 @@ local autoBossToggle = Tab:AddToggle("AutoBossToggle", {
     Default = false
 })
 
--- Loop principal com contador
+-- Função para teleportar até boss global
+local function teleportToBoss(boss)
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    local bossHRP = boss:FindFirstChild("HumanoidRootPart")
+    if hrp and bossHRP then
+        hrp.CFrame = bossHRP.CFrame + Vector3.new(0, 5, 0)
+        Fluent:Notify({
+            Title = "👹 Boss Global Detectado!",
+            Content = "Teleportando para: " .. boss.Name,
+            Duration = 5
+        })
+    end
+end
+
+-- Monitorar pasta de bosses globais
+local enemiesFolder = Workspace:WaitForChild("Server"):WaitForChild("Enemies"):WaitForChild("Gamemodes"):WaitForChild("Global Bosses")
+
+enemiesFolder.ChildAdded:Connect(function(boss)
+    if autoBossToggle.Value and boss:IsA("Model") then
+        boss:WaitForChild("HumanoidRootPart", 10)
+        task.wait(1)
+        teleportToBoss(boss)
+    end
+end)
+
+-- Loop principal: varredura a cada 10 minutos
 autoBossToggle:OnChanged(function(state)
     if state then
         coroutine.wrap(function()
             while autoBossToggle.Value do
-                -- 🔁 Varredura nos 7 CFrames
                 for _, cf in ipairs(bossCFrames) do
+                    if not autoBossToggle.Value then break end
                     local hrp = character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         hrp.CFrame = cf + Vector3.new(0, 5, 0)
                     end
                     task.wait(3)
                 end
-
-                -- ⏱️ Contador regressivo de 10 minutos
-                local tempoRestante = 600 - (#bossCFrames * 3)
-                for i = tempoRestante, 0, -1 do
-                    if not autoBossToggle.Value then
-                        countdownLabel:SetContent("⏹️ Pausado")
-                        return
-                    end
-                    local minutos = math.floor(i / 60)
-                    local segundos = i % 60
-                    countdownLabel:SetContent(string.format("%02d:%02d", minutos, segundos))
-                    task.wait(1)
+                if autoBossToggle.Value then
+                    task.wait(600 - (#bossCFrames * 3))
                 end
             end
         end)()
-    else
-        countdownLabel:SetContent("⏹️ Desativado")
     end
 end)
