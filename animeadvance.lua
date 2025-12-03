@@ -15,7 +15,7 @@ local Window = Fluent:CreateWindow({
     Title = "NetoX Hub",
     SubTitle = "-- " .. gameName,
     TabWidth = 110,
-    Size = UDim2.fromOffset(400, 200),
+    Size = UDim2.fromOffset(400, 220),
     Acrylic = false,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -26,10 +26,16 @@ Window:SelectTab(1)
 
 Tab:AddParagraph({
     Title = "👹 Auto Boss",
-    Content = "Teleporta automaticamente para os bosses nas 7 localizações definidas"
+    Content = "A cada 10 minutos, teleporta para os 7 CFrames por 3s cada"
 })
 
--- Lista de CFrames dos bosses (atualizados)
+-- Label do contador
+local countdownLabel = Tab:AddParagraph({
+    Title = "⏳ Tempo até próxima varredura:",
+    Content = "Aguardando ativação..."
+})
+
+-- Lista de CFrames dos bosses
 local bossCFrames = {
     CFrame.new(-167.655762, 24.4496307, -349.168213),
     CFrame.new(-229.368652, 24.5450287, 159.449951),
@@ -46,19 +52,35 @@ local autoBossToggle = Tab:AddToggle("AutoBossToggle", {
     Default = false
 })
 
--- Loop de teleporte
+-- Loop principal com contador
 autoBossToggle:OnChanged(function(state)
     if state then
         coroutine.wrap(function()
             while autoBossToggle.Value do
+                -- 🔁 Varredura nos 7 CFrames
                 for _, cf in ipairs(bossCFrames) do
                     local hrp = character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         hrp.CFrame = cf + Vector3.new(0, 5, 0)
                     end
-                    task.wait(1.5)
+                    task.wait(3)
+                end
+
+                -- ⏱️ Contador regressivo de 10 minutos
+                local tempoRestante = 600 - (#bossCFrames * 3)
+                for i = tempoRestante, 0, -1 do
+                    if not autoBossToggle.Value then
+                        countdownLabel:SetContent("⏹️ Pausado")
+                        return
+                    end
+                    local minutos = math.floor(i / 60)
+                    local segundos = i % 60
+                    countdownLabel:SetContent(string.format("%02d:%02d", minutos, segundos))
+                    task.wait(1)
                 end
             end
         end)()
+    else
+        countdownLabel:SetContent("⏹️ Desativado")
     end
 end)
