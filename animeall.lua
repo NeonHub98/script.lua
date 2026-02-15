@@ -56,23 +56,23 @@ local AutoWalkTrialMedium = false
 local InTrialMedium = false
 
 -- =====================================
--- TRIAL EASY CFRAMES (Mobs)
+-- TRIAL EASY POSITIONS
 -- =====================================
 local TrialEasyMobs = {
-    CFrame.new(-399.16275, 1005.16699, 3280.09619, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
-    CFrame.new(-399.16275, 1005.16699, 3309.08643, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
-    CFrame.new(-399.16275, 1005.16699, 3339.84668, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
-    CFrame.new(-399.16275, 1005.16699, 3372.55664, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431)
+    Vector3.new(-399.16275, 1005.16699, 3280.09619),
+    Vector3.new(-399.16275, 1005.16699, 3309.08643),
+    Vector3.new(-399.16275, 1005.16699, 3339.84668),
+    Vector3.new(-399.16275, 1005.16699, 3372.55664)
 }
 
 -- =====================================
--- TRIAL MEDIUM CFRAMES (Mobs)
+-- TRIAL MEDIUM POSITIONS
 -- =====================================
 local TrialMediumMobs = {
-    CFrame.new(-399.16275, 1005.16699, 3280.09619, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
-    CFrame.new(-399.16275, 1005.16699, 3309.08643, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
-    CFrame.new(-399.16275, 1005.16699, 3339.84668, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
-    CFrame.new(-399.16275, 1005.16699, 3372.55664, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431)
+    Vector3.new(-399.16275, 1005.16699, 3280.09619),
+    Vector3.new(-399.16275, 1005.16699, 3309.08643),
+    Vector3.new(-399.16275, 1005.16699, 3339.84668),
+    Vector3.new(-399.16275, 1005.16699, 3372.55664)
 }
 
 -- =====================================
@@ -103,17 +103,18 @@ task.spawn(function()
 	end
 end)
 
--- AUTO TRIAL EASY EXECUÇÃO (teleporte direto)
+-- AUTO TRIAL EASY EXECUÇÃO (MoveTo)
 task.spawn(function()
 	while task.wait(0.5) do
 		if AutoWalkTrialEasy and InTrialEasy then
 			local char = Player.Character
-			if char and char:FindFirstChild("HumanoidRootPart") then
-				local hrp = char.HumanoidRootPart
+			if char and char:FindFirstChild("Humanoid") then
+				local humanoid = char:FindFirstChild("Humanoid")
 				task.wait(5) -- espera carregar mapa
 				while AutoWalkTrialEasy and InTrialEasy do
-					for _, cf in ipairs(TrialEasyMobs) do
-						hrp.CFrame = cf
+					for _, pos in ipairs(TrialEasyMobs) do
+						humanoid:MoveTo(pos)
+						humanoid.MoveToFinished:Wait()
 						task.wait(0.5)
 					end
 				end
@@ -150,17 +151,18 @@ task.spawn(function()
 	end
 end)
 
--- AUTO TRIAL MEDIUM EXECUÇÃO (teleporte direto)
+-- AUTO TRIAL MEDIUM EXECUÇÃO (MoveTo)
 task.spawn(function()
 	while task.wait(0.5) do
 		if AutoWalkTrialMedium and InTrialMedium then
 			local char = Player.Character
-			if char and char:FindFirstChild("HumanoidRootPart") then
-				local hrp = char.HumanoidRootPart
+			if char and char:FindFirstChild("Humanoid") then
+				local humanoid = char:FindFirstChild("Humanoid")
 				task.wait(5) -- espera carregar mapa
 				while AutoWalkTrialMedium and InTrialMedium do
-					for _, cf in ipairs(TrialMediumMobs) do
-						hrp.CFrame = cf
+					for _, pos in ipairs(TrialMediumMobs) do
+						humanoid:MoveTo(pos)
+						humanoid.MoveToFinished:Wait()
 						task.wait(0.5)
 					end
 				end
@@ -177,7 +179,7 @@ local TabTrial = Window:AddTab({ Title = "Auto Trial", Icon = "swords" })
 -- Seção Easy
 TabTrial:AddSection("Trial Easy")
 TabTrial:AddToggle("AutoTrialEasy", {
-	Title = "Auto Enter + Teleport Trial Easy",
+	Title = "Auto Enter + MoveTo Trial Easy",
 	Default = false,
 	Callback = function(v)
 		AutoTrialEasy = v
@@ -189,10 +191,11 @@ TabTrial:AddToggle("AutoTrialEasy", {
 -- Seção Medium
 TabTrial:AddSection("Trial Medium")
 TabTrial:AddToggle("AutoTrialMedium", {
-	Title = "Auto Enter + Teleport Trial Medium",
+	Title = "Auto Enter + MoveTo Trial Medium",
 	Default = false,
 	Callback = function(v)
 		AutoTrialMedium = v
 		AutoWalkTrialMedium = v
 		InTrialMedium = false
-		end
+	end
+})
