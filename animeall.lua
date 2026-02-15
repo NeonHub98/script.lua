@@ -103,7 +103,7 @@ task.spawn(function()
 	end
 end)
 
--- AUTO TRIAL EASY EXECUÇÃO (MoveTo mais rápido)
+-- AUTO TRIAL EASY EXECUÇÃO (MoveTo)
 task.spawn(function()
 	while task.wait(0.5) do
 		if AutoWalkTrialEasy and InTrialEasy then
@@ -115,7 +115,7 @@ task.spawn(function()
 					for _, pos in ipairs(TrialEasyMobs) do
 						humanoid:MoveTo(pos)
 						humanoid.MoveToFinished:Wait()
-						task.wait(0.2) -- pausa menor para acelerar
+						task.wait(0.5)
 					end
 				end
 			end
@@ -151,7 +151,7 @@ task.spawn(function()
 	end
 end)
 
--- AUTO TRIAL MEDIUM EXECUÇÃO (MoveTo mais rápido)
+-- AUTO TRIAL MEDIUM EXECUÇÃO (MoveTo)
 task.spawn(function()
 	while task.wait(0.5) do
 		if AutoWalkTrialMedium and InTrialMedium then
@@ -163,7 +163,7 @@ task.spawn(function()
 					for _, pos in ipairs(TrialMediumMobs) do
 						humanoid:MoveTo(pos)
 						humanoid.MoveToFinished:Wait()
-						task.wait(0.2) -- pausa menor para acelerar
+						task.wait(0.5)
 					end
 				end
 			end
