@@ -47,9 +47,13 @@ local EnterTrial = Remotes:WaitForChild("EnterTrial")
 -- =====================================
 -- STATES
 -- =====================================
-local AutoTrial = false
-local AutoWalkTrial = false
-local InTrial = false
+local AutoTrialEasy = false
+local AutoWalkTrialEasy = false
+local InTrialEasy = false
+
+local AutoTrialMedium = false
+local AutoWalkTrialMedium = false
+local InTrialMedium = false
 
 -- =====================================
 -- TRIAL EASY CFRAMES (Mobs)
@@ -62,21 +66,29 @@ local TrialEasyMobs = {
 }
 
 -- =====================================
--- AUTO ENTER TRIAL
+-- TRIAL MEDIUM CFRAMES (Mobs)
+-- =====================================
+local TrialMediumMobs = {
+    CFrame.new(-399.16275, 1005.16699, 3280.09619, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
+    CFrame.new(-399.16275, 1005.16699, 3309.08643, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
+    CFrame.new(-399.16275, 1005.16699, 3339.84668, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431),
+    CFrame.new(-399.16275, 1005.16699, 3372.55664, 6.59227371e-05, 0.930409431, -0.366521657, 0.999999881, -6.58035278e-05, 1.25020742e-05, -1.25020742e-05, -0.366521657, -0.930409431)
+}
+
+-- =====================================
+-- AUTO ENTER TRIAL EASY
 -- =====================================
 task.spawn(function()
 	while task.wait(1) do
-		if AutoTrial and not InTrial then
+		if AutoTrialEasy and not InTrialEasy then
 			pcall(function()
-				EnterTrial:FireServer(1) -- sempre Trial Easy
+				EnterTrial:FireServer(1)
 			end)
 		end
 	end
 end)
 
--- =====================================
--- DETECT IN TRIAL
--- =====================================
+-- DETECT IN TRIAL EASY
 task.spawn(function()
 	local lastPos
 	while task.wait(0.5) do
@@ -84,31 +96,72 @@ task.spawn(function()
 		if char and char:FindFirstChild("HumanoidRootPart") then
 			local pos = char.HumanoidRootPart.Position
 			if lastPos and (pos - lastPos).Magnitude > 200 then
-				InTrial = true
+				InTrialEasy = true
 			end
 			lastPos = pos
 		end
 	end
 end)
 
--- =====================================
--- AUTO TRIAL EXECUÇÃO (andar entre mobs)
--- =====================================
+-- AUTO TRIAL EASY EXECUÇÃO
 task.spawn(function()
 	while task.wait(0.5) do
-		if AutoWalkTrial and InTrial then
+		if AutoWalkTrialEasy and InTrialEasy then
 			local char = Player.Character
 			if char and char:FindFirstChild("HumanoidRootPart") then
 				local hrp = char.HumanoidRootPart
-
-				-- Delay de 5 segundos para carregar mapa
-				task.wait(5)
-
-				-- Loop entre os mobs da Trial Easy
-				while AutoWalkTrial and InTrial do
+				task.wait(5) -- espera carregar mapa
+				while AutoWalkTrialEasy and InTrialEasy do
 					for _, cf in ipairs(TrialEasyMobs) do
 						hrp.CFrame = cf
-						task.wait(0.5) -- tempo em cada mob
+						task.wait(0.5)
+					end
+				end
+			end
+		end
+	end
+end)
+
+-- =====================================
+-- AUTO ENTER TRIAL MEDIUM
+-- =====================================
+task.spawn(function()
+	while task.wait(1) do
+		if AutoTrialMedium and not InTrialMedium then
+			pcall(function()
+				EnterTrial:FireServer(2)
+			end)
+		end
+	end
+end)
+
+-- DETECT IN TRIAL MEDIUM
+task.spawn(function()
+	local lastPos
+	while task.wait(0.5) do
+		local char = Player.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			local pos = char.HumanoidRootPart.Position
+			if lastPos and (pos - lastPos).Magnitude > 200 then
+				InTrialMedium = true
+			end
+			lastPos = pos
+		end
+	end
+end)
+
+-- AUTO TRIAL MEDIUM EXECUÇÃO
+task.spawn(function()
+	while task.wait(0.5) do
+		if AutoWalkTrialMedium and InTrialMedium then
+			local char = Player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				local hrp = char.HumanoidRootPart
+				task.wait(5) -- espera carregar mapa
+				while AutoWalkTrialMedium and InTrialMedium do
+					for _, cf in ipairs(TrialMediumMobs) do
+						hrp.CFrame = cf
+						task.wait(0.5)
 					end
 				end
 			end
@@ -119,14 +172,28 @@ end)
 -- =====================================
 -- UI TAB
 -- =====================================
-local TabTrial = Window:AddTab({ Title = "Auto Trial Easy", Icon = "swords" })
+local TabTrial = Window:AddTab({ Title = "Auto Trial", Icon = "swords" })
 
-TabTrial:AddToggle("AutoTrial", {
+-- Seção Easy
+TabTrial:AddSection("Trial Easy")
+TabTrial:AddToggle("AutoTrialEasy", {
 	Title = "Auto Enter + Farm Trial Easy",
 	Default = false,
 	Callback = function(v)
-		AutoTrial = v
-		AutoWalkTrial = v
-		if not v then InTrial = false end
+		AutoTrialEasy = v
+		AutoWalkTrialEasy = v
+		InTrialEasy = false
+	end
+})
+
+-- Seção Medium
+TabTrial:AddSection("Trial Medium")
+TabTrial:AddToggle("AutoTrialMedium", {
+	Title = "Auto Enter + Farm Trial Medium",
+	Default = false,
+	Callback = function(v)
+		AutoTrialMedium = v
+		AutoWalkTrialMedium = v
+		InTrialMedium = false
 	end
 })
