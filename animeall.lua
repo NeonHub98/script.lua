@@ -103,7 +103,7 @@ task.spawn(function()
 	end
 end)
 
--- AUTO TRIAL EASY EXECUÇÃO
+-- AUTO TRIAL EASY EXECUÇÃO (teleporte direto)
 task.spawn(function()
 	while task.wait(0.5) do
 		if AutoWalkTrialEasy and InTrialEasy then
@@ -150,7 +150,7 @@ task.spawn(function()
 	end
 end)
 
--- AUTO TRIAL MEDIUM EXECUÇÃO
+-- AUTO TRIAL MEDIUM EXECUÇÃO (teleporte direto)
 task.spawn(function()
 	while task.wait(0.5) do
 		if AutoWalkTrialMedium and InTrialMedium then
@@ -177,7 +177,7 @@ local TabTrial = Window:AddTab({ Title = "Auto Trial", Icon = "swords" })
 -- Seção Easy
 TabTrial:AddSection("Trial Easy")
 TabTrial:AddToggle("AutoTrialEasy", {
-	Title = "Auto Enter + Farm Trial Easy",
+	Title = "Auto Enter + Teleport Trial Easy",
 	Default = false,
 	Callback = function(v)
 		AutoTrialEasy = v
@@ -189,11 +189,10 @@ TabTrial:AddToggle("AutoTrialEasy", {
 -- Seção Medium
 TabTrial:AddSection("Trial Medium")
 TabTrial:AddToggle("AutoTrialMedium", {
-	Title = "Auto Enter + Farm Trial Medium",
+	Title = "Auto Enter + Teleport Trial Medium",
 	Default = false,
 	Callback = function(v)
 		AutoTrialMedium = v
 		AutoWalkTrialMedium = v
 		InTrialMedium = false
-	end
-})
+		end
