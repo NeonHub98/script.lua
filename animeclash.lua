@@ -66,7 +66,7 @@ local SelectedMap = "mapa1"
 -- Auto Farm Mobs
 local AutoFarmMob = false
 local RefreshMobs = false
-local SelectedMob = nil
+local SelectedMobs = {} -- lista de mobs selecionados
 
 -- =====================================
 -- FUNÇÃO PARA PEGAR NOMES ÚNICOS DOS MOBS
@@ -97,19 +97,25 @@ task.spawn(function()
     end
 end)
 
--- Auto Farm Mobs
+-- Auto Farm Mobs (multi-select + 0.1s)
 task.spawn(function()
     while true do
-        if AutoFarmMob and SelectedMob then
+        if AutoFarmMob and #SelectedMobs > 0 then
             local player = Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local hrp = character:WaitForChild("HumanoidRootPart")
 
             for _, mob in ipairs(workspace.Enemies:GetChildren()) do
                 local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                if mob.Name == SelectedMob and mobHRP then
-                    hrp.CFrame = mobHRP.CFrame * CFrame.new(0,0,5)
-                    task.wait(0.5)
+                local humanoid = mob:FindFirstChildOfClass("Humanoid")
+
+                if mobHRP and humanoid and humanoid.Health > 0 then
+                    for _, selected in ipairs(SelectedMobs) do
+                        if mob.Name == selected then
+                            hrp.CFrame = mobHRP.CFrame * CFrame.new(0,0,5)
+                            task.wait(0.1)
+                        end
+                    end
                 end
             end
         end
@@ -118,7 +124,7 @@ task.spawn(function()
             mobDropdown:SetValues(getUniqueMobNames())
         end
 
-        task.wait(0.5)
+        task.wait(0.1)
     end
 end)
 
@@ -174,7 +180,7 @@ task.spawn(function()
 end)
 
 -- =====================================
--- UI TABS (ordem organizada)
+-- UI TABS
 -- =====================================
 
 -- 1. Auto Farm (Mobs)
@@ -190,10 +196,11 @@ TabFarm:AddToggle("RefreshMobs", {
     Callback = function(v) RefreshMobs = v end
 })
 mobDropdown = TabFarm:AddDropdown("MobSelect", {
-    Title = "Selecionar Mob",
+    Title = "Selecionar Mobs",
     Values = getUniqueMobNames(),
-    Default = nil,
-    Callback = function(v) SelectedMob = v end
+    Multi = true, -- permite selecionar vários
+    Default = {},
+    Callback = function(v) SelectedMobs = v end
 })
 
 -- 2. Player Farm (Auto Click Turbo)
@@ -233,7 +240,7 @@ TabGacha:AddToggle("AutoGacha", {
 })
 
 -- 5. Auto Upgrades
-local TabUpgrade = Window:AddTab({ Title = "Auto Upgrades", Icon = "trending-up" }) -- ícone atualizado
+local TabUpgrade = Window:AddTab({ Title = "Auto Upgrades", Icon = "trending-up" })
 TabUpgrade:AddDropdown("UpgradeSelect", {
     Title = "Selecionar Tipo de Upgrade",
     Values = {"Ninja","Ghoul","Sayajin"},
