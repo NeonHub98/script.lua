@@ -37,6 +37,30 @@ local Window = Fluent:CreateWindow({
 })
 
 -- =====================================
+-- BOTÃO FLUTUANTE (FORA DO HUB, MOBILE/PC)
+-- =====================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ZeonHubToggle"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local ToggleButton = Instance.new("ImageButton")
+ToggleButton.Size = UDim2.new(0, 60, 0, 60) -- tamanho do botão
+ToggleButton.Position = UDim2.new(0.85, 0, 0.05, 0) -- canto superior direito
+ToggleButton.BackgroundTransparency = 1 -- sem fundo
+ToggleButton.Image = "rbxassetid://10511856020" -- sua imagem personalizada
+ToggleButton.Parent = ScreenGui
+ToggleButton.Active = true
+ToggleButton.Draggable = true -- pode arrastar o botão na tela
+
+ToggleButton.MouseButton1Click:Connect(function()
+    if Window:IsMinimized() then
+        Window:Show()      -- abre/mostra o Hub
+    else
+        Window:Minimize()  -- fecha/minimiza o Hub
+    end
+end)
+
+-- =====================================
 -- REMOTES
 -- =====================================
 local GachaService = ReplicatedStorage:WaitForChild("Core"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("GachaService")
@@ -63,10 +87,9 @@ local AutoUpgrade = false
 local SelectedUpgrade = "Ninja"
 local SelectedMap = "mapa1"
 
--- Auto Farm Mobs
 local AutoFarmMob = false
 local RefreshMobs = false
-local SelectedMobs = {} -- lista de mobs selecionados
+local SelectedMob = nil
 
 -- =====================================
 -- FUNÇÃO PARA PEGAR NOMES ÚNICOS DOS MOBS
@@ -86,36 +109,33 @@ end
 -- LOOPS
 -- =====================================
 
--- Auto Click Turbo
+-- Auto Click Turbo (F2P + P2W, turbo máximo)
 task.spawn(function()
     while true do
         if AutoFarm then
-            local args = {4}
-            pcall(function() Attack:InvokeServer(unpack(args)) end)
+            local argsF2P = {4}
+            pcall(function() Attack:InvokeServer(unpack(argsF2P)) end)
+
+            local argsP2W = {1}
+            pcall(function() Attack:InvokeServer(unpack(argsP2W)) end)
         end
-        task.wait()
+        task.wait() -- turbo máximo (a cada frame)
     end
 end)
 
--- Auto Farm Mobs (multi-select + 0.1s)
+-- Auto Farm Mobs
 task.spawn(function()
     while true do
-        if AutoFarmMob and #SelectedMobs > 0 then
+        if AutoFarmMob and SelectedMob then
             local player = Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local hrp = character:WaitForChild("HumanoidRootPart")
 
             for _, mob in ipairs(workspace.Enemies:GetChildren()) do
                 local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-                local humanoid = mob:FindFirstChildOfClass("Humanoid")
-
-                if mobHRP and humanoid and humanoid.Health > 0 then
-                    for _, selected in ipairs(SelectedMobs) do
-                        if mob.Name == selected then
-                            hrp.CFrame = mobHRP.CFrame * CFrame.new(0,0,5)
-                            task.wait(0.1)
-                        end
-                    end
+                if mob.Name == SelectedMob and mobHRP then
+                    hrp.CFrame = mobHRP.CFrame * CFrame.new(0,0,5)
+                    task.wait(0.5)
                 end
             end
         end
@@ -124,7 +144,7 @@ task.spawn(function()
             mobDropdown:SetValues(getUniqueMobNames())
         end
 
-        task.wait(0.1)
+        task.wait(0.5)
     end
 end)
 
@@ -182,7 +202,6 @@ end)
 -- =====================================
 -- UI TABS
 -- =====================================
-
 -- 1. Auto Farm (Mobs)
 local TabFarm = Window:AddTab({ Title = "Auto Farm", Icon = "sword" })
 TabFarm:AddToggle("AutoFarmMob", {
@@ -196,11 +215,10 @@ TabFarm:AddToggle("RefreshMobs", {
     Callback = function(v) RefreshMobs = v end
 })
 mobDropdown = TabFarm:AddDropdown("MobSelect", {
-    Title = "Selecionar Mobs",
+    Title = "Selecionar Mob",
     Values = getUniqueMobNames(),
-    Multi = true, -- permite selecionar vários
-    Default = {},
-    Callback = function(v) SelectedMobs = v end
+    Default = nil,
+    Callback = function(v) SelectedMob = v end
 })
 
 -- 2. Player Farm (Auto Click Turbo)
@@ -240,7 +258,7 @@ TabGacha:AddToggle("AutoGacha", {
 })
 
 -- 5. Auto Upgrades
-local TabUpgrade = Window:AddTab({ Title = "Auto Upgrades", Icon = "trending-up" })
+local TabUpgrade = Window:AddTab({ Title = "Auto Upgrades", Icon = "trending-up" }) -- ícone atualizado
 TabUpgrade:AddDropdown("UpgradeSelect", {
     Title = "Selecionar Tipo de Upgrade",
     Values = {"Ninja","Ghoul","Sayajin"},
